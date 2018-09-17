@@ -142,9 +142,9 @@ class IOFPGA(
     // Skew the RX clock to sample in the data eye
     val chiplink_rx_pll = Module(new PolarFireCCC(PLLParameters(
         name = "chiplink_rx_pll",
-        PLLInClockParameters(125), 
-        Seq(PLLOutClockParameters(freqMHz=125),
-        PLLOutClockParameters(freqMHz=125, phaseDeg = 240)))))
+        PLLInClockParameters(100), 
+        Seq(PLLOutClockParameters(freqMHz=100),
+        PLLOutClockParameters(freqMHz=100, phaseDeg = 240)))))
 
     val lock = chiplink_rx_pll.io.PLL_LOCK_0
     chiplink_rx_pll.io.REF_CLK_0 := chiplink_rx_clkint.io.Y
@@ -188,8 +188,8 @@ class IOFPGAChip(implicit override val p: Parameters) extends VeraShell
   // DUT
   //-----------------------------------------------------------------------
 
-  // System runs at 125 MHz
-  dut_clock := hart_clk_125
+  // System runs at 100 MHz
+  dut_clock := hart_clk_100
   dut_ext_reset_n := ereset_n
 
   val pcie = IO(new PolarFireEvalKitPCIeX4Pads)
@@ -268,7 +268,7 @@ class IOFPGAChip(implicit override val p: Parameters) extends VeraShell
     //---------------------------------------------------------------------
     // ChipLink
     //---------------------------------------------------------------------
-    iofpga.io.tx_clock := hart_clk_125_tx
+    iofpga.io.tx_clock := hart_clk_100_tx
     chiplink <> iofpga.io.chiplink
     
     constrainChipLink(iofpga=true)
