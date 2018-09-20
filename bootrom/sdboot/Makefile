@@ -1,7 +1,7 @@
 # RISCV environment variable must be set
 
-CC=$(RISCV)/bin/riscv64-unknown-elf-gcc
-OBJCOPY=$(RISCV)/bin/riscv64-unknown-elf-objcopy
+CC=riscv64-sifive-elf-gcc
+OBJCOPY=riscv64-sifive-elf-objcopy
 CFLAGS=-march=rv64imac -mcmodel=medany -O2 -std=gnu11 -Wall -nostartfiles 
 CFLAGS+= -fno-common -g -DENTROPY=0 -mabi=lp64 -DNONSMP_HART=0 
 CFLAGS+= -I $(BOOTROM_DIR)/include -I.
