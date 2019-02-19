@@ -151,9 +151,6 @@ static uint16_t crc16_round(uint16_t crc, uint8_t data) {
 	return crc;
 }
 
-#define SPIN_SHIFT	6
-#define SPIN_UPDATE(i)	(!((i) & ((1 << SPIN_SHIFT)-1)))
-#define SPIN_INDEX(i)	(((i) >> SPIN_SHIFT) & 0x3)
 
 static const char spinner[] = { '-', '/', '|', '\\' };
 
@@ -206,23 +203,28 @@ static int copy(void)
 	return rc;
 }
 
+
+#define SPIN_SHIFT	16
+#define SPIN_UPDATE(i)	(!((i) & ((1 << SPIN_SHIFT)-1)))
+#define SPIN_INDEX(i)	(((i) >> SPIN_SHIFT) & 0x3)
+
 int main(void)
 {
 	REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
 
 	kputs("INIT");
-	sd_poweron();
-	if (sd_cmd0() ||
-	    sd_cmd8() ||
-	    sd_acmd41() ||
-	    sd_cmd58() ||
-	    sd_cmd16() ||
-	    copy()) {
-		kputs("ERROR");
-		return 1;
+            
+	kputs("Deadspin, waiting for debugger");
+        kprintf(" --> \ ");
+	int i;
+	while(1){
+		i++;
+		if (SPIN_UPDATE(i)) {
+			kputc('\b');
+			kputc(spinner[SPIN_INDEX(i)]);
+		}
 	}
 
-	kputs("BOOT");
 
 	__asm__ __volatile__ ("fence.i" : : : "memory");
 	return 0;
