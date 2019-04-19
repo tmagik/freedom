@@ -80,6 +80,12 @@ class DevKitFPGADesign(wranglerNode: ClockAdapterNode, corePLL: PLLNode)(implici
     tlclock.bind(u.device)
   } }
 
+/* 'mask' ram for bootloader development, at sideband address of asic HW */
+  
+  val address = AddressSet(0x08000000,  0x1fffff)
+  val sram = LazyModule(new TLRAM(address, beatBytes = mbus.beatBytes))
+  sram.node := TLFragmenter(mbus.beatBytes, mbus.blockBytes) := mbus.toDRAMController(Some("maskRAM"))()
+
   (p(PeripherySPIKey) zip p(SDIOOverlayKey)).foreach { case (sparam, soverlay) => {
     val s = soverlay(SDIOOverlayParams(sparam, pbus, ibus.fromAsync))
     tlclock.bind(s.device)
@@ -102,7 +108,7 @@ class DevKitFPGADesign(wranglerNode: ClockAdapterNode, corePLL: PLLNode)(implici
   }
 
   // hook the first PCIe the board has
-  val pcies = p(PCIeOverlayKey).headOption.map(_(PCIeOverlayParams(wranglerNode)))
+  val pcies = p(PCIeOverlayKey).headOption.map(_(PCIeOverlayParams(wranglerNode, corePLL=corePLL)))
   pcies.zipWithIndex.map { case((pcieNode, pcieInt), i) =>
     val pciename = Some(s"pcie_$i")
     sbus.fromMaster(pciename) { pcieNode }
@@ -128,8 +134,10 @@ class U500VC707DevKitSystemModule[+L <: DevKitFPGADesign](_outer: L)
     with HasPeripheryDebugModuleImp
 {
   // Reset vector is set to the location of the mask rom
-  val maskROMParams = p(PeripheryMaskROMKey)
-  global_reset_vector := maskROMParams(0).address.U
+  //val maskROMParams = p(PeripheryMaskROMKey)
+  //global_reset_vector := maskROMParams(0).address.U
+  //global_reset_vector := sram(0).address.U
+  global_reset_vector := 0x08000000.U
 
   // hook up GPIOs to LEDs
   val gpioParams = _outer.gpioParams
