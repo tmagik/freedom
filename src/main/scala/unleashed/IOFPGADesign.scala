@@ -28,10 +28,15 @@ case object IOFPGAFrequencyKey extends Field[Double](100.0)
 class IOFPGADesign()(implicit p: Parameters) extends LazyModule with BindingScope
 {
   // Merge the expansion board's DTS with the Aloe DTS
+  // We make a 'dtso' device tree overlay, and a full merged DTB.
+  // see https://bootlin.com/blog/dt-overlay-uboot-libfdt/
+  // TODO: refactor this for full overlay support
   Device.skipIndexes(10000)
-  lazy val dts = DTS(bindingTree)
+  lazy val dtso = DTS(bindingTree)
   lazy val prelude = io.Source.fromFile("bootrom/U540Config.dts").mkString
-  lazy val dtb = DTB(prelude + dts.substring(10))
+  lazy val dts = prelude + dtso.substring(10) /* strip /dts-v1/; */
+  lazy val dtb = DTB(dts)
+  ElaborationArtefacts.add("dtso", dtso)
   ElaborationArtefacts.add("dts", dts)
   ElaborationArtefacts.add("graphml", graphML)
 
@@ -158,8 +163,13 @@ class IOFPGADesign()(implicit p: Parameters) extends LazyModule with BindingScop
 
   // Bind IOFPGA soc nodes to HiFive unleashed
   ResourceBinding {
+    val build_id = io.Source.fromFile("build_id").mkString.trim()
+    // hack there is an object somewhere that has this..
+    val config_txt = io.Source.fromFile("config_txt").mkString.trim()
     Resource(ResourceAnchors.root, "compat").bind(ResourceString("iofpga"))
     Resource(ResourceAnchors.root, "model").bind(ResourceString("iofpga-dev"))
+    Resource(ResourceAnchors.root, "build").bind(ResourceString(build_id))
+    Resource(ResourceAnchors.root, "config").bind(ResourceString(config_txt))
     Resource(ResourceAnchors.root, "width").bind(ResourceInt(2))
     Resource(ResourceAnchors.soc,  "width").bind(ResourceInt(2))
     val managers = ManagerUnification(sbar.node.edges.in.head.manager.managers)

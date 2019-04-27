@@ -42,10 +42,19 @@ $(FIRRTL_JAR): $(shell find $(rocketchip_dir)/firrtl/src/main/scala -iname "*.sc
 	mkdir -p $(rocketchip_dir)/chisel3/lib
 	cp -p $(FIRRTL_JAR) $(rocketchip_dir)/chisel3/lib
 
+#TODO figure out scala enough to do this cleanly
+#BUILD_ID = $(BUILD_DIR)/build_id
+#CONFIG_TXT = $(BUILD_DIR)/config_txt
+BUILD_ID = build_id
+CONFIG_TXT = config_txt
+
+
 # Build .fir
 firrtl := $(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).fir
 $(firrtl): $(shell find $(base_dir)/src/main/scala -name '*.scala') $(FIRRTL_JAR)
 	mkdir -p $(dir $@)
+	git describe --always --dirty | tee $(BUILD_ID)
+	echo $(CONFIG) > $(CONFIG_TXT)
 	$(SBT) "runMain freechips.rocketchip.system.Generator $(BUILD_DIR) $(PROJECT) $(MODEL) $(CONFIG_PROJECT) $(CONFIG)"
 
 .PHONY: firrtl
