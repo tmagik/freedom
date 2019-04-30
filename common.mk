@@ -16,7 +16,7 @@ export ROMCONF=$(BUILD_DIR)/$(CONFIG_PROJECT).$(CONFIG).rom.conf
 
 # export to fpga-shells
 export FPGA_TOP_SYSTEM=$(MODEL)
-export FPGA_BUILD_DIR=$(BUILD_DIR)/$(FPGA_TOP_SYSTEM)
+export FPGA_BUILD_DIR=$(BUILD_DIR)/$(FPGA_TOP_SYSTEM)/$(CONFIG)/
 export fpga_common_script_dir=$(FPGA_DIR)/common/tcl
 export fpga_board_script_dir=$(FPGA_DIR)/$(BOARD)/tcl
 
@@ -105,7 +105,7 @@ $(mcs): $(bit)
 mcs: $(mcs)
 
 # Build Libero project
-prjx := $(BUILD_DIR)/libero/$(MODEL).prjx
+prjx := $(BUILD_DIR)/$(CONFIG)/Libero/$(MODEL).prjx
 $(prjx): $(verilog)
 	cd $(BUILD_DIR); libero SCRIPT:$(fpga_common_script_dir)/libero.tcl SCRIPT_ARGS:"$(BUILD_DIR) $(MODEL) $(CONFIG_PROJECT) $(CONFIG) $(BOARD)"
 
