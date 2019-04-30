@@ -232,6 +232,10 @@ class WithFrequency(MHz: Double) extends Config((site, here, up) => {
 })
 
 class With100MHz extends WithFrequency(100)
+class With105MHz extends WithFrequency(105)
+class With110MHz extends WithFrequency(110)
+class With115MHz extends WithFrequency(115)
+class With120MHz extends WithFrequency(120)
 class With125MHz extends WithFrequency(125)
 class With150MHz extends WithFrequency(150)
 class With166MHz extends WithFrequency(166.666)
